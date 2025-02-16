@@ -1,6 +1,8 @@
 import { defineConfig } from 'vite';
 import laravel from 'laravel-vite-plugin';
 import vue from '@vitejs/plugin-vue';
+import VueI18nPlugin from '@intlify/vite-plugin-vue-i18n';
+import path from 'path';
 
 export default defineConfig({
     plugins: [
@@ -10,6 +12,7 @@ export default defineConfig({
                 'resources/js/app.js',
             ],
             refresh: true,
+
         }),
         vue({
             template: {
@@ -18,6 +21,9 @@ export default defineConfig({
                     includeAbsolute: false,
                 },
             },
+        }),
+        VueI18nPlugin({
+            include: path.resolve(__dirname, 'resources/js/locales/**'),
         }),
     ],
     resolve: {

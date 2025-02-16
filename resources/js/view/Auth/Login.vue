@@ -67,8 +67,12 @@ const login = async () => {
         const response = await axios.post("api/auth/login", form);
         console.log(response); // Debugging
 
-        // Redirect to Home after successful login
-        router.push("/");
+        // If the response contains a message indicating a login failure, handle it
+        if (response.data.error) {
+            errors.email = response.data.error || "Invalid login details.";
+        } else {
+            router.push("/"); // Redirect to Home after successful login
+        }
     } catch (error) {
         console.error(
             "Error:",

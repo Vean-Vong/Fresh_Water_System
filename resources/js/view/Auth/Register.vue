@@ -134,9 +134,7 @@ const register = async () => {
 </script>
 
 <template>
-    <div
-        class="d-flex justify-content-center align-items-center "
-    >
+    <div class="d-flex justify-content-center align-items-center">
         <div
             class="card shadow p-4"
             style="width: 100%; max-width: 400px; border-radius: 15px"
@@ -207,6 +205,7 @@ const register = async () => {
                 </button>
             </form>
         </div>
+      
     </div>
 </template>
 

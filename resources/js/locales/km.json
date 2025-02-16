@@ -1,0 +1,12 @@
+{
+    "message": "សួស្ដី",
+    "Sidebar":{
+        "dashboard":"ទំព័រដើម",
+        "employee":"បុគ្គលិក",
+        "customer":"អតិថិជន",
+        "about":"អំពី",
+        "product":"ទំនិញ",
+        "logout":"ចាកចេញ",
+        "search":"ស្វែងរកទីនេះ..."
+    }
+}

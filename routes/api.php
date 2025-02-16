@@ -2,17 +2,10 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\EmployeeController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
-/*
-|--------------------------------------------------------------------------
-| API Routes
-|--------------------------------------------------------------------------
-| These routes are loaded by the RouteServiceProvider and assigned the "api"
-| middleware group. Use "auth:sanctum" for secure routes.
-|
-*/
 
 // Get the authenticated user (Protected route)
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
@@ -26,6 +19,17 @@ Route::prefix('auth')->group(function () {
 });
 
 // Customer routes (Protected: Requires authentication)
-Route::middleware('auth:sanctum')->group(function () {
-    Route::post('/customers', [CustomerController::class, 'store'])->name('customers.store'); // Only accessible if logged in
-});
+
+// Store a newly created customer
+Route::post('/customers', [CustomerController::class, 'store']);
+// Fetch all customers
+Route::get('/customers', [CustomerController::class, 'index']);
+// Fetch a single customer by ID
+Route::get('/customers/{id}', [CustomerController::class, 'show']);
+// Update a customer
+Route::put('/customers/{id}', [CustomerController::class, 'update']);
+// Delete a customer
+Route::delete('/customers/{id}', [CustomerController::class, 'destroy']);
+
+/// Employee route
+Route::apiResource('employees', EmployeeController::class);

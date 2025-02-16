@@ -23,7 +23,7 @@ import "@fortawesome/fontawesome-free/css/all.min.css";
                     @click="handleLinkClick"
                 >
                     <i class="fa fa-home"></i>
-                    Dashboard
+                    {{ $t("Sidebar.dashboard") }}
                 </router-link>
                 <router-link
                     to="/employee"
@@ -31,7 +31,7 @@ import "@fortawesome/fontawesome-free/css/all.min.css";
                     @click="handleLinkClick"
                 >
                     <i class="fas fa-user-tie"></i>
-                    <span>Employee</span>
+                    {{ $t("Sidebar.employee") }}
                 </router-link>
                 <router-link
                     to="/customer"
@@ -39,7 +39,7 @@ import "@fortawesome/fontawesome-free/css/all.min.css";
                     @click="handleLinkClick"
                 >
                     <i class="fas fa-users"></i>
-                    <span>Customer</span>
+                    {{ $t("Sidebar.customer") }}
                 </router-link>
                 <router-link
                     to="/products"
@@ -47,7 +47,7 @@ import "@fortawesome/fontawesome-free/css/all.min.css";
                     @click="handleLinkClick"
                 >
                     <i class="fas fa-box-open"></i>
-                    <span>Products</span>
+                    {{ $t("Sidebar.product") }}
                 </router-link>
                 <router-link
                     to="/about"
@@ -55,7 +55,7 @@ import "@fortawesome/fontawesome-free/css/all.min.css";
                     @click="handleLinkClick"
                 >
                     <i class="fas fa-info-circle"></i>
-                    <span>About</span>
+                    {{ $t("Sidebar.about") }}
                 </router-link>
                 <router-link
                     to="/login"
@@ -74,18 +74,6 @@ import "@fortawesome/fontawesome-free/css/all.min.css";
                     <span>Register</span>
                 </router-link>
             </nav>
-
-            <!-- Logout Button at Bottom -->
-            <div class="logout">
-                <router-link
-                    to="/logout"
-                    active-class="active"
-                    @click="handleLogout"
-                >
-                    <i class="fas fa-sign-out-alt text-danger"></i>
-                    <span class="text-danger">Logout</span>
-                </router-link>
-            </div>
         </aside>
 
         <!-- Main Content -->
@@ -126,7 +114,7 @@ import "@fortawesome/fontawesome-free/css/all.min.css";
                                 alt="Flag"
                                 class="flag-icon"
                             />
-                            {{ selectedLanguage.name }}
+                            {{ selectedLanguage.short }}
                         </button>
                         <ul v-if="isDropdownOpen" class="dropdown-menu show">
                             <li v-for="lang in languages" :key="lang.name">
@@ -278,6 +266,68 @@ import "@fortawesome/fontawesome-free/css/all.min.css";
                             </div>
                         </div>
                     </label>
+
+                    <div class="dropdown">
+                        <button
+                            class="btn dropdown-toggle"
+                            type="button"
+                            @click="openAvatar"
+                            :aria-expanded="isOpenAvatar.toString()"
+                        >
+                            <img
+                                class="avatar"
+                                style="
+                                    width: 50px;
+                                    border-radius: 50%;
+                                    margin-left: 20px;
+                                    cursor: pointer;
+                                "
+                                src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQYN4scLAOk6JcRBGzBZrq9N4zSHo6oOB_aycIUGb6FlF48fK8XsTr1a6AJZgMuYrduBeY&usqp=CAU"
+                                alt="User Avatar"
+                            />
+                        </button>
+
+                        <!-- Dropdown Menu -->
+                        <div
+                            v-if="isOpenAvatar"
+                            class="dropdown-menu"
+                            style="
+                                position: absolute;
+                                top: 50px;
+                                right: 0;
+                                width: 200px;
+                            "
+                        >
+                            <ul
+                                class="list-unstyled d-flex flex-column p-0 m-0"
+                            >
+                                <li>
+                                    <router-link
+                                        to="/profile"
+                                        active-class="active"
+                                        @click="goToProfile"
+                                        class="text-decoration-none d-flex align-items-center"
+                                    >
+                                        <i class="fas fa-user p-2"></i>
+                                        <span>Profile</span>
+                                    </router-link>
+                                </li>
+                                <li>
+                                    <router-link
+                                        to="/login"
+                                        active-class="active"
+                                        @click="logOut"
+                                        class="text-decoration-none d-flex align-items-center"
+                                    >
+                                        <i
+                                            class="fas fa-sign-out-alt p-2 text-danger"
+                                        ></i>
+                                        <span class="text-danger">Logout</span>
+                                    </router-link>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
                 </div>
             </header>
 
@@ -293,22 +343,26 @@ export default {
     data() {
         return {
             isMobile: window.innerWidth <= 768,
+            isOpenAvatar: false,
             sidebarOpen: false, // Tracks the state of the sidebar
             isDropdownOpen: false,
             selectedLanguage: {
+                code: "km",
                 name: "Khmer",
-                path: "/change_language/km",
-                flag: "https://flagcdn.com/w40/kh.png", // Cambodia flag 🇰🇭
+                short: "KH",
+                flag: "https://flagcdn.com/w40/kh.png",
             }, // Default language
             languages: [
                 {
+                    code: "km",
                     name: "Khmer",
-                    path: "/change_language/km",
+                    short: "KH",
                     flag: "https://flagcdn.com/w40/kh.png",
                 }, // 🇰🇭 Cambodia
                 {
+                    code: "en",
                     name: "English",
-                    path: "/change_language/en",
+                    short: "EN",
                     flag: "https://flagcdn.com/w40/gb.png",
                 }, // 🇬🇧 UK
             ],
@@ -317,6 +371,11 @@ export default {
     mounted() {
         console.log("Responsive Sidebar and Navbar component mounted.");
         window.addEventListener("resize", this.handleResize);
+
+        // Set default language based on Vue I18n locale
+        this.selectedLanguage =
+            this.languages.find((lang) => lang.code === this.$i18n.locale) ||
+            this.languages[0];
     },
     beforeUnmount() {
         // Use beforeUnmount instead of beforeDestroy (Vue 3)
@@ -344,13 +403,52 @@ export default {
             this.isDropdownOpen = !this.isDropdownOpen;
         },
         selectLanguage(lang) {
-            this.isDropdownOpen = false; // Close the dropdown after selection
+            this.selectedLanguage = lang;
+            this.$i18n.locale = lang.code; // Change language dynamically
+            this.isDropdownOpen = false; // Close dropdown
+        },
+        openAvatar() {
+            this.isOpenAvatar = !this.isOpenAvatar;
+        },
+        goToProfile() {
+            console.log("Navigate to Profile");
+            // Add your navigation logic here
+            this.isOpenAvatar = false; // Close the dropdown after selection
+        },
+        goToSettings() {
+            console.log("Navigate to Settings");
+            // Add your navigation logic here
+            this.isOpenAvatar = false; // Close the dropdown after selection
+        },
+        logOut() {
+            console.log("Log out");
+            // Add your log out logic here
+            this.isOpenAvatar = false; // Close the dropdown after selection
         },
     },
 };
 </script>
 
 <style scoped>
+/* Optional: Styling for the dropdown items */
+.dropdown-menu {
+    background-color: #fff;
+    border-radius: 5px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    width: 200px;
+    right: 0;
+}
+.dropdown-menu ul {
+    padding: 0;
+    margin: 0;
+}
+.dropdown-menu li {
+    padding: 8px 16px;
+    cursor: pointer;
+}
+.dropdown-menu li:hover {
+    background-color: #f1f1f1;
+}
 .Logo {
     margin-top: -10px;
     display: flex;
@@ -447,7 +545,7 @@ h1 {
     font-size: 1rem;
     border-radius: 40px;
     transition: all 0.3s ease-in-out;
-    width: 250px;
+    width: 220px;
 }
 
 .sidebar a:hover {

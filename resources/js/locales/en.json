@@ -1,0 +1,12 @@
+{
+    "message": "Hello, world",
+    "Sidebar":{
+        "dashboard":"Dashboard",
+        "employee":"Employees",
+        "customer":"Customers",
+        "about":"About",
+        "product":"Products",
+        "logout":"Logout",
+        "search":"Search here..."
+    }
+}

@@ -1,10 +1,10 @@
 import { createRouter, createWebHistory } from "vue-router";
 
 // Use dynamic imports for all components
-const Home = () => import("@/view/Homepage.vue");
+const Home = () => import("@/view/Dashboard/Homepage.vue");
 const About = () => import("@/view/About.vue");
-const Customer = () => import("@/view/Customer.vue");
-const Employee = () => import("@/view/Employee.vue");
+const Customer = () => import("@/view/Customers/Customer.vue");
+const Employee = () => import("@/view/Employees/Employee.vue");
 const Product = () => import("@/view/Products.vue");
 const Register = () => import("@/view/Auth/Register.vue");
 const Login = () => import("@/view/Auth/Login.vue");
