@@ -1,12 +1,10 @@
 <script setup>
-import { reactive, watch } from "vue";
+import { reactive, watch, ref } from "vue";
 import axios from "axios";
-import { useRouter } from "vue-router"; // Import Vue Router
+import { useRouter } from "vue-router";
 
-// Initialize Vue Router
 const router = useRouter();
 
-// Form and errors reactive objects
 let form = reactive({
     name: "",
     email: "",
@@ -19,27 +17,23 @@ let errors = reactive({
     email: "",
     password: "",
     phone_number: "",
-    emailExists: "", // To handle the specific email existence error
+    emailExists: "",
 });
 
-// Validation function
+const isLoading = ref(false);
+
 const validateForm = () => {
     let isValid = true;
-
-    // Reset errors on every validation call
     errors.name = "";
     errors.email = "";
     errors.password = "";
     errors.phone_number = "";
-    errors.emailExists = ""; // Reset emailExists error
+    errors.emailExists = "";
 
-    // Validate Username
     if (!form.name) {
         errors.name = "Username is required";
         isValid = false;
     }
-
-    // Validate Email
     if (!form.email) {
         errors.email = "Email is required";
         isValid = false;
@@ -47,8 +41,6 @@ const validateForm = () => {
         errors.email = "Email is invalid";
         isValid = false;
     }
-
-    // Validate Password
     if (!form.password) {
         errors.password = "Password is required";
         isValid = false;
@@ -56,8 +48,6 @@ const validateForm = () => {
         errors.password = "Password must be at least 6 characters";
         isValid = false;
     }
-
-    // Validate Phone Number
     if (!form.phone_number) {
         errors.phone_number = "Phone number is required";
         isValid = false;
@@ -68,7 +58,6 @@ const validateForm = () => {
 
     return isValid;
 };
-
 // Clear errors when the user starts typing
 watch(
     () => form.name,
@@ -100,35 +89,52 @@ watch(
     }
 );
 
-// Register function (to handle form submission)
 const register = async () => {
     if (!validateForm()) {
         return;
     }
 
-    try {
-        // Send the registration data
-        const response = await axios.post("/api/auth/register", form);
-        console.log(response); // For debugging purposes
+    isLoading.value = true;
 
-        // If registration is successful, reset the form and redirect to login page
+    try {
+        const response = await axios.post(
+            "http://127.0.0.1:8000/api/auth/register",
+            form
+        );
         form.name = "";
         form.email = "";
         form.password = "";
         form.phone_number = "";
 
-        // Navigate to login page
-        router.push("/login"); // Assuming you have a login route
-    } catch (error) {
-        // Log the error to debug the response structure
-        console.error("Registration error response:", error.response);
+        // Log the response data to confirm if the backend is sending back the expected response
+        console.log("Backend response:", response);
 
-        // Handle errors returned from the server
+        // Use the correct user data from the backend response
+        const user = response.data.user;
+
+        // Save user data to localStorage after successful registration
+        localStorage.setItem("username", user.name);
+        localStorage.setItem("email", user.email);
+        localStorage.setItem("phone_number", user.phone_number);
+
+        // Log data saved to localStorage
+        console.log(
+            "Saving data to localStorage:",
+            user.name,
+            user.email,
+            user.phone_number
+        );
+        console.log(localStorage.getItem("username"));
+        console.log(localStorage.getItem("email"));
+        console.log(localStorage.getItem("phone_number"));
+
+        router.push("/login");
+    } catch (error) {
         if (error.response?.data?.email) {
-            errors.emailExists = error.response.data.email[0]; // Display the first email error message
-        } else {
-            console.error(error.response?.data?.message || "Register failed");
+            errors.emailExists = error.response.data.email[0];
         }
+    } finally {
+        isLoading.value = false;
     }
 };
 </script>
@@ -200,12 +206,22 @@ const register = async () => {
                     </div>
                 </div>
 
-                <button type="submit" class="btn btn-primary w-100 mt-3">
-                    Sign-up
+                <button
+                    type="submit"
+                    class="btn btn-primary w-100 mt-3"
+                    :disabled="isLoading"
+                >
+                    <span
+                        v-if="isLoading"
+                        class="spinner-border spinner-border-sm"
+                        role="status"
+                        aria-hidden="true"
+                    ></span>
+                    <span v-if="isLoading"> Registering...</span>
+                    <span v-else>Sign-up</span>
                 </button>
             </form>
         </div>
-      
     </div>
 </template>
 

@@ -50,6 +50,22 @@ import "@fortawesome/fontawesome-free/css/all.min.css";
                     {{ $t("Sidebar.product") }}
                 </router-link>
                 <router-link
+                    to="/sale"
+                    active-class="active"
+                    @click="handleLinkClick"
+                >
+                    <i class="fas fa-user-tag"></i>
+                    {{ $t("Sidebar.sale") }}
+                </router-link>
+                <router-link
+                    to="/setting"
+                    active-class="active"
+                    @click="handleLinkClick"
+                >
+                    <i class="fas fa-cog"></i>
+                    {{ $t("Sidebar.setting") }}
+                </router-link>
+                <router-link
                     to="/about"
                     active-class="active"
                     @click="handleLinkClick"
@@ -58,6 +74,14 @@ import "@fortawesome/fontawesome-free/css/all.min.css";
                     {{ $t("Sidebar.about") }}
                 </router-link>
                 <router-link
+                    to="/client"
+                    active-class="active"
+                    @click="handleLinkClick"
+                >
+                    <i class="fas fa-building"></i>
+                    {{ $t("Sidebar.client") }}
+                </router-link>
+                <!-- <router-link
                     to="/login"
                     active-class="active"
                     @click="handleLinkClick"
@@ -72,7 +96,7 @@ import "@fortawesome/fontawesome-free/css/all.min.css";
                 >
                     <i class="fas fa-user-plus"></i>
                     <span>Register</span>
-                </router-link>
+                </router-link> -->
             </nav>
         </aside>
 
@@ -86,18 +110,7 @@ import "@fortawesome/fontawesome-free/css/all.min.css";
                 >
                     ☰
                 </button>
-                <div
-                    class="form mb-3 border"
-                    style="width: 400px; border-radius: 10px"
-                >
-                    <input
-                        type="text"
-                        class="form-control"
-                        id="floatingInput"
-                        placeholder="Search here..."
-                        style="border-radius: 10px"
-                    />
-                </div>
+                <h2 class="text-white">{{ $t("system") }}</h2>
 
                 <!-- Change Language and dark mode -->
                 <div class="Right-item">
@@ -108,6 +121,7 @@ import "@fortawesome/fontawesome-free/css/all.min.css";
                             type="button"
                             @click="toggleDropdown"
                             aria-expanded="isDropdownOpen"
+                            style="color: white"
                         >
                             <img
                                 :src="selectedLanguage.flag"
@@ -303,13 +317,13 @@ import "@fortawesome/fontawesome-free/css/all.min.css";
                             >
                                 <li>
                                     <router-link
-                                        to="/profile"
+                                        to="/profileComponent"
                                         active-class="active"
                                         @click="goToProfile"
                                         class="text-decoration-none d-flex align-items-center"
                                     >
                                         <i class="fas fa-user p-2"></i>
-                                        <span>Profile</span>
+                                        <span>{{ $t("profile") }}</span>
                                     </router-link>
                                 </li>
                                 <li>
@@ -322,7 +336,9 @@ import "@fortawesome/fontawesome-free/css/all.min.css";
                                         <i
                                             class="fas fa-sign-out-alt p-2 text-danger"
                                         ></i>
-                                        <span class="text-danger">Logout</span>
+                                        <span class="text-danger">{{
+                                            $t("logout")
+                                        }}</span>
                                     </router-link>
                                 </li>
                             </ul>
@@ -337,34 +353,33 @@ import "@fortawesome/fontawesome-free/css/all.min.css";
         </div>
     </div>
 </template>
-
 <script>
 export default {
     data() {
         return {
             isMobile: window.innerWidth <= 768,
             isOpenAvatar: false,
-            sidebarOpen: false, // Tracks the state of the sidebar
+            sidebarOpen: false,
             isDropdownOpen: false,
             selectedLanguage: {
                 code: "km",
                 name: "Khmer",
                 short: "KH",
                 flag: "https://flagcdn.com/w40/kh.png",
-            }, // Default language
+            },
             languages: [
                 {
                     code: "km",
                     name: "Khmer",
                     short: "KH",
                     flag: "https://flagcdn.com/w40/kh.png",
-                }, // 🇰🇭 Cambodia
+                },
                 {
                     code: "en",
                     name: "English",
                     short: "EN",
                     flag: "https://flagcdn.com/w40/gb.png",
-                }, // 🇬🇧 UK
+                },
             ],
         };
     },
@@ -372,64 +387,74 @@ export default {
         console.log("Responsive Sidebar and Navbar component mounted.");
         window.addEventListener("resize", this.handleResize);
 
-        // Set default language based on Vue I18n locale
-        this.selectedLanguage =
-            this.languages.find((lang) => lang.code === this.$i18n.locale) ||
-            this.languages[0];
+        // Load the saved language from localStorage
+        const savedLanguage = localStorage.getItem("selectedLanguage");
+        if (savedLanguage) {
+            this.selectedLanguage = JSON.parse(savedLanguage);
+            this.$i18n.locale = this.selectedLanguage.code; // Apply saved language
+        } else {
+            // Default language based on Vue I18n locale
+            this.selectedLanguage =
+                this.languages.find(
+                    (lang) => lang.code === this.$i18n.locale
+                ) || this.languages[0];
+        }
     },
     beforeUnmount() {
-        // Use beforeUnmount instead of beforeDestroy (Vue 3)
         window.removeEventListener("resize", this.handleResize);
     },
     methods: {
         handleResize() {
             this.isMobile = window.innerWidth <= 768;
             if (!this.isMobile) {
-                this.sidebarOpen = true; // Keep the sidebar open on larger screens
+                this.sidebarOpen = true;
             }
         },
         toggleSidebar() {
-            this.sidebarOpen = !this.sidebarOpen; // Toggle sidebar state
+            this.sidebarOpen = !this.sidebarOpen;
         },
         handleLinkClick() {
             if (this.isMobile) {
-                this.sidebarOpen = false; // Close the sidebar after clicking a link
+                this.sidebarOpen = false;
             }
-        },
-        onSearch(event) {
-            console.log("Search query:", event.target.value);
         },
         toggleDropdown() {
             this.isDropdownOpen = !this.isDropdownOpen;
         },
         selectLanguage(lang) {
             this.selectedLanguage = lang;
-            this.$i18n.locale = lang.code; // Change language dynamically
-            this.isDropdownOpen = false; // Close dropdown
+            this.$i18n.locale = lang.code;
+            localStorage.setItem("selectedLanguage", JSON.stringify(lang)); // Save selection
+            this.isDropdownOpen = false;
         },
         openAvatar() {
             this.isOpenAvatar = !this.isOpenAvatar;
         },
         goToProfile() {
             console.log("Navigate to Profile");
-            // Add your navigation logic here
-            this.isOpenAvatar = false; // Close the dropdown after selection
+            this.isOpenAvatar = false;
         },
         goToSettings() {
             console.log("Navigate to Settings");
-            // Add your navigation logic here
-            this.isOpenAvatar = false; // Close the dropdown after selection
+            this.isOpenAvatar = false;
         },
         logOut() {
             console.log("Log out");
-            // Add your log out logic here
-            this.isOpenAvatar = false; // Close the dropdown after selection
+            this.isOpenAvatar = false;
+            this.$router.push("/login");
         },
     },
 };
 </script>
 
 <style scoped>
+h2 {
+    font-family: "Moul", serif;
+    font-weight: 400;
+    font-style: normal;
+    font-size: 20px;
+}
+
 /* Optional: Styling for the dropdown items */
 .dropdown-menu {
     background-color: #fff;
@@ -575,7 +600,7 @@ h1 {
 
 /* Navbar */
 .navbar {
-    background-color: #f8f9fa;
+    background: linear-gradient(to left, #010921, #202c3c);
     padding: 1rem;
     border-bottom: 1px solid #ddd;
     display: flex;

@@ -12,64 +12,69 @@ class AuthController extends Controller
     public function register(Request $req)
     {
         $rules = [
-            'name' => 'required|string',
-            'email' => 'required|string|unique:users,email', // Add unique validation for email
+            'username' => 'required|string|unique:users,username',
+            'email' => 'required|string|email|unique:users,email', // Unique check handles duplicate emails
             'password' => 'required|string|min:6',
-            'phone_number' => 'required|string'
+            'phone_number' => 'nullable|string',
+            'gender' => 'nullable|in:male,female,other',
+            'address' => 'nullable|string'
         ];
 
+        // Validate the request
         $validator = Validator::make($req->all(), $rules);
 
         if ($validator->fails()) {
-            return response()->json($validator->errors(), 400);
+            return response()->json(['errors' => $validator->errors()], 400);
         }
 
-        // Check if the email already exists manually (in case it wasn't caught)
-        if (User::where('email', $req->email)->exists()) {
-            return response()->json(['message' => 'Email already exists'], 400);
-        }
-
-        // Store the password as plain text (not recommended for security reasons)
-        $password = $req->password;
-
-        // Create new user in users table with plain text password
+        // Create new user
         $user = User::create([
-            'name' => $req->name,
+            'username' => $req->username,
             'email' => $req->email,
-            'password' => $password, // Store plain text password
-            'phone_number' => $req->phone_number
+            'password' => Hash::make($req->password), // Hash password before storing
+            'phone_number' => $req->phone_number,
+            'gender' => $req->gender,
+            'address' => $req->address,
+            'role' => 'user',
         ]);
 
-        // Create token for the newly registered user
+        // Generate token
         $token = $user->createToken('Personal Access Token')->plainTextToken;
 
-        // Return response with user data and token
-        $response = ['user' => $user, 'token' => $token];
-        return response()->json($response, 200);
+        return response()->json(['user' => $user, 'token' => $token], 201);
     }
-
 
     public function login(Request $req)
-{
-    $rules = [
-        'email' => 'required|string|email',
-        'password' => 'required|string'
-    ];
-    $req->validate($rules);
+    {
+        // Validate input
+        $rules = [
+            'email' => 'required|string|email',
+            'password' => 'required|string'
+        ];
+        $req->validate($rules);
 
-    $user = User::where('email', $req->email)->first();
+        // Find user by email
+        $user = User::where('email', $req->email)->first();
 
-    if (!$user) {
-        return response()->json(['message' => 'Incorrect email'], 400);  // Specific error for email
+        // Check if email exists
+        if (!$user) {
+            return response()->json(['message' => 'Incorrect email'], 400);
+        }
+
+        // Validate password using Hash::check()
+        if (!Hash::check($req->password, $user->password)) {
+            return response()->json(['message' => 'Incorrect password'], 400);
+        }
+
+        // Generate token
+        $token = $user->createToken('Personal Access Token')->plainTextToken;
+        // Custom message after successful login
+        $message = "Welcome back, " . $user->username . "! You have successfully logged in!";
+
+        return response()->json([
+            'message' => $message,  // Custom success message
+            'user' => $user,
+            'token' => $token
+        ], 200);
     }
-
-    if ($user->password !== $req->password) {
-        return response()->json(['message' => 'Incorrect password'], 400);  // Specific error for password
-    }
-
-    $token = $user->createToken('Personal Access Token')->plainTextToken;
-
-    return response()->json(['user' => $user, 'token' => $token], 200);
-}
-
 }

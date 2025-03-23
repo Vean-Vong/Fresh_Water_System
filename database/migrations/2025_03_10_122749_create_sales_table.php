@@ -13,13 +13,16 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('customers', function (Blueprint $table) {
+        Schema::create('sales', function (Blueprint $table) {
             $table->id();
-            $table->string('name', 100);
-            $table->string('address', 255);
-            $table->string('phone', 15);
+            $table->String('model');
+            $table->decimal('price');
+            $table->string('discount')->nullable();
             $table->date('date');
-            $table->string('job', 50);
+            $table->string('duration')->nullable();
+            $table->string('warranty')->nullable();
+            $table->String('seller');
+            $table->enum('contract_type', ['rental', 'installment', 'purchase'])->default('purchase');
             $table->timestamps();
         });
     }
@@ -31,6 +34,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('customers');
+        Schema::dropIfExists('sales');
     }
 };

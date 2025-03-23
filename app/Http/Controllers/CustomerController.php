@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Customer;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class CustomerController extends Controller
 {
@@ -29,7 +30,6 @@ class CustomerController extends Controller
             $customer->date = Carbon::parse($customer->date)->format('Y-m-d'); // Format date to 'YYYY-MM-DD'
             return $customer;
         });
-
         return response()->json([
             'customers' => $customers,
             'recentCustomers' => $recentCustomers,
@@ -49,9 +49,7 @@ class CustomerController extends Controller
             'address' => 'required|string|max:255',
             'phone' => 'required|string|max:15',
             'date' => 'required|date',
-            'model' => 'required|string|max:100',
-            'seller' => 'required|string|max:100',
-            'contract_type' => 'required|in:installment,rental,buy',
+            'job' => 'required|string|max:100',
         ]);
 
         $customer = Customer::create($validatedData);
@@ -63,6 +61,18 @@ class CustomerController extends Controller
             'message' => 'Customer added successfully.',
             'customer' => $customer,
         ], 201);
+    }
+
+
+    public function show($id)
+    {
+        $customer = Customer::find($id);
+
+        if (!$customer) {
+            return response()->json(['message' => 'Customer not found'], 404);
+        }
+
+        return response()->json($customer, 200);
     }
 
     /**
@@ -79,9 +89,7 @@ class CustomerController extends Controller
             'address' => 'required|string|max:255',
             'phone' => 'required|string|max:15',
             'date' => 'required|date',
-            'model' => 'required|string|max:100',
-            'seller' => 'required|string|max:100',
-            'contract_type' => 'required|in:installment,rental,buy',
+            'job' => 'required|string|max:100',
         ]);
 
         $customer = Customer::find($id);

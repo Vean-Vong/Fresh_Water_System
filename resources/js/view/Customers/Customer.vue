@@ -3,36 +3,72 @@
         <!-- Customer Table -->
         <div class="container">
             <div class="addCustomer">
-                <h2>Customer List</h2>
-                <button class="btn btn-primary" @click="openAddDialog">
-                    <i class="fas fa-plus"></i> New Customer
-                </button>
+                <router-link to="/addCustomer">
+                    <button class="btnAdd text-white">
+                        <i class="fas fa-plus"></i> {{ $t("new_customer") }}
+                    </button></router-link
+                >
+                <div class="input-group" style="width: 500px">
+                    <input
+                        type="text"
+                        class="form-control"
+                        placeholder="Search here..."
+                        v-model="searchQuery"
+                    />
+                    <button class="btnSearch" type="button">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
             </div>
 
             <table class="table">
                 <thead>
                     <tr class="table">
-                        <th>ID</th>
-                        <th>Name</th>
-                        <th>Address</th>
-                        <th>Phone</th>
-                        <th>Date</th>
-                        <th>Model</th>
-                        <th>Seller</th>
-                        <th>Contract Type</th>
-                        <th>Action</th>
+                        <th class="table-title text-white">ID</th>
+                        <th class="table-title text-white">
+                            {{ $t("customer_name") }}
+                        </th>
+                        <th class="table-title text-white">
+                            {{ $t("address") }}
+                        </th>
+                        <th class="table-title text-white">
+                            {{ $t("phone") }}
+                        </th>
+                        <th class="table-title text-white">{{ $t("date") }}</th>
+                        <th class="table-title text-white">
+                            {{ $t("job") }}
+                        </th>
+                        <th class="table-title text-white">
+                            {{ $t("action") }}
+                        </th>
                     </tr>
                 </thead>
                 <tbody>
+                    <div v-if="loading" class="center-loader-container">
+                        <div class="loader"></div>
+                    </div>
+
+                    <!-- Show error message if request fails -->
+                    <tr v-else-if="errorMessage">
+                        <td colspan="10" class="text-center text-danger">
+                            {{ errorMessage }}
+                        </td>
+                    </tr>
+
+                    <!-- Show "No data" message if the response is empty -->
+                    <tr v-else-if="customers.length === 0">
+                        <td colspan="10" class="text-center">
+                            {{ $t("no_customer_available") }}
+                        </td>
+                    </tr>
+
                     <tr v-for="customer in customers" :key="customer.id">
                         <td>{{ customer.id }}</td>
                         <td>{{ customer.name }}</td>
                         <td>{{ customer.address }}</td>
                         <td>{{ customer.phone }}</td>
                         <td>{{ formatDate(customer.date) }}</td>
-                        <td>{{ customer.model }}</td>
-                        <td>{{ customer.seller }}</td>
-                        <td>{{ customer.contract_type }}</td>
+                        <td>{{ customer.job }}</td>
                         <td>
                             <button
                                 class="btn btn-sm btn-warning btn-view"
@@ -40,12 +76,11 @@
                             >
                                 <i class="fas fa-print"></i>
                             </button>
-                            <button
-                                class="btn btn-sm btn-warning btn-edit"
-                                @click="openEditDialog(customer)"
-                            >
-                                <i class="fas fa-edit"></i>
-                            </button>
+                            <router-link :to="`/editCustomer/${customer.id}`">
+                                <button class="btn btn-sm btn-warning btn-edit">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                            </router-link>
 
                             <button
                                 class="btn btn-sm btn-danger btn-delete"
@@ -58,102 +93,28 @@
                 </tbody>
             </table>
         </div>
-
-        <!-- Add Customer Dialog -->
-        <div v-if="showAddDialog" class="modal">
-            <div class="modal-content">
-                <h3 class="title">Add Customer</h3>
-                <label>Name:</label>
-                <input type="text" v-model="newCustomer.name" />
-
-                <label>Address:</label>
-                <input type="text" v-model="newCustomer.address" />
-
-                <label>Phone:</label>
-                <input type="text" v-model="newCustomer.phone" />
-
-                <label>Date:</label>
-                <input type="date" v-model="newCustomer.date" />
-
-                <label>Model:</label>
-                <input type="text" v-model="newCustomer.model" />
-
-                <label>Seller:</label>
-                <input type="text" v-model="newCustomer.seller" />
-
-                <label>Contract Type:</label>
-                <select v-model="newCustomer.contract_type" class="mt-3">
-                    <option value="" disabled>Select contract type</option>
-                    <option value="installment">installment</option>
-                    <option value="rental">rental</option>
-                    <option value="buy">buy</option>
-                </select>
-
-                <div class="modal-actions">
-                    <button class="btn btn-success" @click="addCustomer">
-                        Save
-                    </button>
-                    <button class="btn btn-secondary" @click="closeAddDialog">
-                        Cancel
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Edit Dialog -->
-        <div v-if="showEditDialog" class="modal">
-            <div class="modal-content">
-                <h3 class="title">Edit Customer</h3>
-                <label>Name:</label>
-                <input type="text" v-model="editedCustomer.name" />
-
-                <label>Address:</label>
-                <input type="text" v-model="editedCustomer.address" />
-
-                <label>Phone:</label>
-                <input type="text" v-model="editedCustomer.phone" />
-
-                <label>Date:</label>
-                <input type="date" v-model="editedCustomer.date" />
-
-                <label>Model:</label>
-                <input type="text" v-model="editedCustomer.model" />
-
-                <label>Seller:</label>
-                <input type="text" v-model="editedCustomer.seller" />
-
-                <label>Contract Type:</label>
-                <input type="text" v-model="editedCustomer.contract_type" />
-
-                <div class="modal-actions">
-                    <button class="btn btn-success" @click="updateCustomer">
-                        Save
-                    </button>
-                    <button
-                        class="btn btn-secondary"
-                        @click="showEditDialog = false"
-                    >
-                        Cancel
-                    </button>
-                </div>
-            </div>
-        </div>
-
         <!-- View Customer Modal -->
         <div v-if="showViewDialog" class="modal">
             <div class="modal-content">
-                <h3 class="title">Customer Details</h3>
-                <p><strong>Name:</strong> {{ editedCustomer.name }}</p>
-                <p><strong>Address:</strong> {{ editedCustomer.address }}</p>
-                <p><strong>Phone:</strong> {{ editedCustomer.phone }}</p>
+                <h3 class="title">{{ $t("view_customer") }}</h3>
                 <p>
-                    <strong>Date:</strong> {{ formatDate(editedCustomer.date) }}
+                    <strong>{{ $t("customer_name") }}:</strong> {{ editedCustomer.name }}
                 </p>
-                <p><strong>Model:</strong> {{ editedCustomer.model }}</p>
-                <p><strong>Seller:</strong> {{ editedCustomer.seller }}</p>
                 <p>
-                    <strong>Contract Type:</strong>
-                    {{ editedCustomer.contract_type }}
+                    <strong>{{ $t("address") }}:</strong>
+                    {{ editedCustomer.address }}
+                </p>
+                <p>
+                    <strong>{{ $t("phone") }}:</strong>
+                    {{ editedCustomer.phone }}
+                </p>
+                <p>
+                    <strong>{{ $t("date") }}:</strong>
+                    {{ formatDate(editedCustomer.date) }}
+                </p>
+                <p>
+                    <strong>{{ $t("job") }}:</strong>
+                    {{ editedCustomer.job }}
                 </p>
 
                 <div class="modal-actions">
@@ -161,11 +122,11 @@
                         class="btn btn-secondary"
                         @click="showViewDialog = false"
                     >
-                        Close
+                        {{ $t("cancel") }}
                     </button>
                     <!-- Print Button -->
-                    <button class="btn btn-info" @click="printCustomer">
-                        <i class="fas fa-print"></i> Print
+                    <button class="btn btn-primary" @click="printCustomer">
+                        <i class="fas fa-print"></i> {{ $t("print") }}
                     </button>
                 </div>
             </div>
@@ -181,176 +142,82 @@ export default {
     data() {
         return {
             customers: [],
+            loading: true,
+            searchQuery: "",
             successMessage: "",
             errorMessage: "",
-            showEditDialog: false, // Controls the edit modal
-            showAddDialog: false, // Controls the add modal
             showViewDialog: false,
-            editedCustomer: {
-                id: null,
-                name: "",
-                address: "",
-                phone: "",
-                date: "",
-                model: "",
-                seller: "",
-                contract_type: "",
-            },
-            newCustomer: {
-                name: "",
-                address: "",
-                phone: "",
-                date: "",
-                model: "",
-                seller: "",
-                contract_type: "",
-            },
+
         };
     },
 
     mounted() {
         this.fetchCustomers();
     },
+    computed: {
+        customers() {
+            return this.customers.filter((customer) => {
+                return customer.name
+                    .toLowerCase()
+                    .includes(this.searchQuery.toLowerCase());
+            });
+        },
+    },
     methods: {
-        fetchCustomers() {
-            axios
-                .get("http://127.0.0.1:8000/api/customers")
-                .then((response) => {
-                    this.customers = response.data.customers.data;
-                })
-                .catch((error) => {
-                    console.error(error);
-                    this.errorMessage = "Failed to load customers.";
-                });
+        async fetchCustomers() {
+            this.loading = true;
+            this.errorMessage = "";
+
+            try {
+                const response = await axios.get(
+                    "http://127.0.0.1:8000/api/customers"
+                );
+                this.customers = response.data.customers.data;
+            } catch (error) {
+                console.error(error);
+                this.errorMessage = "Failed to load customers.";
+            } finally {
+                this.loading = false;
+            }
         },
 
         // Open the edit dialog with the selected customer's data
         openEditDialog(customer) {
             this.editedCustomer = { ...customer }; // Clone the customer data
+
+            // If the date exists, format it to YYYY-MM-DD
+            if (this.editedCustomer.date) {
+                const date = new Date(this.editedCustomer.date);
+                // Use toLocaleDateString() or manually format to YYYY-MM-DD
+                this.editedCustomer.date = date.toISOString().split("T")[0]; // Formats date to YYYY-MM-DD
+            }
+
             this.showEditDialog = true; // Show the modal
         },
 
-        // Open the add customer dialog
-        openAddDialog() {
-            this.newCustomer = {
-                // Reset the form for a new customer
-                name: "",
-                address: "",
-                phone: "",
-                date: "",
-                model: "",
-                seller: "",
-                contract_type: "",
-            };
-            this.showAddDialog = true; // Show the add modal
-        },
 
         openViewDialog(customer) {
             this.editedCustomer = { ...customer }; // Clone the customer data
             this.showViewDialog = true; // Show the modal
         },
 
-        // Close the add customer dialog
-        closeAddDialog() {
-            this.showAddDialog = false;
-        },
-
-        // Add the new customer
-        addCustomer() {
-            axios
-                .post("http://127.0.0.1:8000/api/customers", this.newCustomer)
-                .then(() => {
-                    this.showAddDialog = false;
-                    this.fetchCustomers(); // Refresh the list of customers
-                    Swal.fire(
-                        "Added!",
-                        "New customer added successfully.",
-                        "success"
-                    );
-                })
-                .catch((error) => {
-                    console.error(error);
-                    this.errorMessage = "Failed to add customer.";
-                    Swal.fire("Error!", "Failed to add customer.", "error");
-                });
-        },
-
         // Print function
         printCustomer() {
-            const printWindow = window.open("", "", "width=600,height=600");
-            printWindow.document.write(
-                "<html><head><title>Print Customer</title></head><body>"
-            );
-            printWindow.document.write("<h3>Customer Details</h3>");
-            printWindow.document.write(
-                "<p><strong>Name:</strong> " + this.editedCustomer.name + "</p>"
-            );
-            printWindow.document.write(
-                "<p><strong>Address:</strong> " +
-                    this.editedCustomer.address +
-                    "</p>"
-            );
-            printWindow.document.write(
-                "<p><strong>Phone:</strong> " +
-                    this.editedCustomer.phone +
-                    "</p>"
-            );
-            printWindow.document.write(
-                "<p><strong>Date:</strong> " +
-                    this.formatDate(this.editedCustomer.date) +
-                    "</p>"
-            );
-            printWindow.document.write(
-                "<p><strong>Model:</strong> " +
-                    this.editedCustomer.model +
-                    "</p>"
-            );
-            printWindow.document.write(
-                "<p><strong>Seller:</strong> " +
-                    this.editedCustomer.seller +
-                    "</p>"
-            );
-            printWindow.document.write(
-                "<p><strong>Contract Type:</strong> " +
-                    this.editedCustomer.contract_type +
-                    "</p>"
-            );
-            printWindow.document.write("</body></html>");
-            printWindow.document.close();
-            printWindow.print();
+            window.print();
         },
 
-        updateCustomer() {
-            axios
-                .put(
-                    `http://127.0.0.1:8000/api/customers/${this.editedCustomer.id}`,
-                    this.editedCustomer
-                )
-                .then(() => {
-                    this.showEditDialog = false;
-                    this.fetchCustomers(); // Refresh the list of customers
-                    Swal.fire(
-                        "Updated!",
-                        "Customer details updated successfully.",
-                        "success"
-                    );
-                })
-                .catch((error) => {
-                    console.error(error);
-                    this.errorMessage = "Failed to update customer.";
-                    Swal.fire("Error!", "Failed to update customer.", "error");
-                });
-        },
+
 
         deleteCustomer(id) {
             Swal.fire({
-                title: "Are you sure?",
-                text: "You won't be able to revert this!",
+                title: this.$t("are_you_sure"),
+                text: this.$t("once_delete"),
                 icon: "warning",
                 showCancelButton: true,
                 confirmButtonColor: "#d33",
                 cancelButtonColor: "#3085d6",
-                confirmButtonText: "Yes, delete it!",
+                confirmButtonText:this.$t('Yes_delete_it'),
+                cancelButtonText: this.$t("cancel"),
             }).then((result) => {
                 if (result.isConfirmed) {
                     axios
@@ -358,8 +225,8 @@ export default {
                         .then(() => {
                             this.fetchCustomers(); // Refresh the list
                             Swal.fire(
-                                "Deleted!",
-                                "Customer has been deleted.",
+                                this.$t('Deleted'),
+                               this.$t('customer_deleted'),
                                 "success"
                             );
                         })
@@ -377,13 +244,91 @@ export default {
         },
 
         formatDate(date) {
-            return new Date(date).toLocaleDateString();
+            if (!date) return "";
+            const options = { year: "numeric", month: "long", day: "numeric" };
+            return new Date(date).toLocaleDateString("en-US", options);
         },
+    },
+    created() {
+        this.fetchCustomers();
     },
 };
 </script>
 
 <style scoped>
+/* Center the loader in the viewport */
+.center-loader-container {
+    display: flex;
+    padding-bottom: 10px;
+    padding-left: 600px;
+}
+
+.loader {
+    width: 25px;
+    height: 50px;
+    display: grid;
+    color: #000;
+    background: linear-gradient(currentColor 0 0) top/100% 2px,
+        radial-gradient(
+                farthest-side at top,
+                #0000 calc(100% - 2px),
+                currentColor calc(100% - 1px),
+                #0000
+            )
+            top,
+        linear-gradient(currentColor 0 0) bottom/100% 2px,
+        radial-gradient(
+                farthest-side at bottom,
+                #0000 calc(100% - 2px),
+                currentColor calc(100% - 1px),
+                #0000
+            )
+            bottom;
+    background-size: 100% 1px, 100% 50%;
+    background-repeat: no-repeat;
+    animation: l18 4s infinite linear;
+}
+
+.loader::before,
+.loader::after {
+    content: "";
+    grid-area: 1/1;
+    background: inherit;
+    border: inherit;
+    animation: inherit;
+}
+
+.loader::after {
+    animation-duration: 2s;
+}
+
+@keyframes l18 {
+    100% {
+        transform: rotate(1turn);
+    }
+}
+.btnSearch {
+    background: linear-gradient(to right, #010921, #202c3c);
+    color: white;
+}
+.form-control {
+    border: #010921 solid 1px;
+}
+
+h2,
+h3 {
+    font-family: "Moul", serif;
+    font-weight: 400;
+    font-style: normal;
+    font-size: 28px;
+}
+.btnAdd {
+    background: linear-gradient(to right, #010921, #202c3c);
+}
+.table-title {
+    background: linear-gradient(to right, #010921, #202c3c);
+    font-family: "Content", serif;
+}
 .container {
     margin-left: -20px;
 }
@@ -394,6 +339,7 @@ export default {
     margin-bottom: 5px;
     padding-left: 2px;
 }
+
 .table {
     width: 110%;
     border-collapse: collapse;
@@ -404,9 +350,8 @@ export default {
     padding: 8px;
     text-align: center;
     font-size: 15px;
-}
-.table th {
-    background-color: #f2f2f2;
+    vertical-align: middle;
+
 }
 .alert {
     transition: opacity 0.8s ease-in-out;
@@ -456,9 +401,9 @@ export default {
 }
 /* Modal Content */
 .modal-content {
-    background: #fff;
+    /* background: #fff; */
     padding: 25px;
-    width: 450px;
+    width: 400px;
     max-width: 90%; /* Make the modal responsive on smaller screens */
     border-radius: 10px;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); /* Slight shadow for depth */
@@ -477,21 +422,9 @@ export default {
     }
 }
 
-/* Input Fields */
-input[type="text"],
-input[type="date"] {
-    width: 100%;
-    padding: 5px;
-    margin: 10px 0;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    box-sizing: border-box; /* Ensure padding doesn't affect the width */
-    font-size: 18px;
-}
-
 /* Label Styles */
 label {
-    font-size: 20px;
+    font-size: 18px;
     font-weight: 500;
     display: block;
     color: #333;

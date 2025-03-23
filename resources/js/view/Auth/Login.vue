@@ -1,9 +1,26 @@
 <script setup>
-import { reactive, watch } from "vue";
+import { reactive, watch, ref, onMounted } from "vue";
 import axios from "axios";
 import { useRouter } from "vue-router";
 
 const router = useRouter();
+
+const username = ref("");
+const email = ref("");
+const phoneNumber = ref("");
+
+onMounted(() => {
+    // Retrieve data from localStorage
+    username.value = localStorage.getItem("username");
+    email.value = localStorage.getItem("email");
+    phoneNumber.value = localStorage.getItem("phone_number");
+
+    // Log to see if data is correctly fetched
+    console.log("Retrieved from localStorage:");
+    console.log("Username:", username.value);
+    console.log("Email:", email.value);
+    console.log("Phone:", phoneNumber.value);
+});
 
 // Reactive form and error objects
 let form = reactive({
@@ -15,6 +32,8 @@ let errors = reactive({
     email: "",
     password: "",
 });
+
+const isLoading = ref(false); // Loading state
 
 // Validation function
 const validateForm = () => {
@@ -63,11 +82,15 @@ const login = async () => {
         return; // Stop if validation fails
     }
 
+    isLoading.value = true; // Set loading state
+
     try {
-        const response = await axios.post("api/auth/login", form);
+        const response = await axios.post(
+            "http://127.0.0.1:8000/api/auth/login",
+            form
+        );
         console.log(response); // Debugging
 
-        // If the response contains a message indicating a login failure, handle it
         if (response.data.error) {
             errors.email = response.data.error || "Invalid login details.";
         } else {
@@ -91,6 +114,8 @@ const login = async () => {
         } else {
             errors.email = errorMessage || "Login failed";
         }
+    } finally {
+        isLoading.value = false; // Reset loading state
     }
 };
 </script>
@@ -131,8 +156,19 @@ const login = async () => {
                     </div>
                 </div>
 
-                <button type="submit" class="btn btn-primary w-100">
-                    Sign-in
+                <button
+                    type="submit"
+                    class="btn btn-primary w-100"
+                    :disabled="isLoading"
+                >
+                    <span
+                        v-if="isLoading"
+                        class="spinner-border spinner-border-sm"
+                        role="status"
+                        aria-hidden="true"
+                    ></span>
+                    <span v-if="isLoading"> Signing in...</span>
+                    <span v-else> Sign-in </span>
                 </button>
             </form>
         </div>

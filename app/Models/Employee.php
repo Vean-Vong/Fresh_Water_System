@@ -9,16 +9,16 @@ class Employee extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'gender', 'department', 'position', 'email', 'phone', 'address', 'date_of_birth', 'hire_date', 'status',];
+    protected $fillable = ['name', 'gender', 'position', 'email', 'phone', 'address', 'date_of_birth', 'hire_date',];
 
     protected $casts = [
         'hire_date' => 'date',
         'date_of_birth' => 'date',
-        'status' => 'boolean',
+        // 'status' => 'boolean',
     ];
-    // Accessor to return "Active" or "Inactive" instead of true/false
-    public function getStatusAttribute($value)
-    {
-        return $value ? 'Active' : 'Inactive';
-    }
+    // // Accessor to return "Active" or "Inactive" instead of true/false
+    // public function getStatusAttribute($value)
+    // {
+    //     return $value ? 'Active' : 'Inactive';
+    // }
 }

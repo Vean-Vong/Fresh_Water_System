@@ -51,14 +51,14 @@ class EmployeeController extends Controller
         $validatedData = $request->validate([
             'name' => 'required|string|max:255',
             'gender' => 'required|in:Male,Female,Other',
-            'department' => 'required|string|max:255',
+            // 'department' => 'required|string|max:255',
             'position' => 'required|string|max:255',
             'hire_date' => 'required|date',
             'email' => 'required|email|unique:employees,email',
             'phone' => 'required|string|max:15',
             'date_of_birth' => 'required|date',
             'address' => 'required|string|max:255',
-            'status' => 'required|boolean', // true for active, false for inactive
+            // 'status' => 'required|boolean',
         ]);
 
         $employee = Employee::create($validatedData);
@@ -112,14 +112,14 @@ class EmployeeController extends Controller
         $validatedData = $request->validate([
             'name' => 'sometimes|string|max:255',
             'gender' => 'sometimes|in:Male,Female,Other',
-            'department' => 'sometimes|string|max:255',
+            // 'department' => 'sometimes|string|max:255',
             'position' => 'sometimes|string|max:255',
             'hire_date' => 'sometimes|date',
             'email' => 'sometimes|email|unique:employees,email,' . $id,
             'phone' => 'sometimes|string|max:15',
             'date_of_birth' => 'sometimes|date',
             'address' => 'sometimes|string|max:255',
-            'status' => 'sometimes|boolean',
+            // 'status' => 'sometimes|boolean',
         ]);
 
         $employee->update($validatedData);
