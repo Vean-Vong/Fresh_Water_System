@@ -41,7 +41,6 @@
         <p>Copyright Gang San 2025. | Developed by Our Team! </p>
     </div>
 </template>
-<script></script>
 <style>
 
 .logo {
